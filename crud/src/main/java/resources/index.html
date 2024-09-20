@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário de Produto</title>
+</head>
+<body>
+    <h1>Criar Produto</h1>
+    <form id="produtoForm">
+        Nome: <input type="text" id="nome" required>
+        Preço: <input type="number" id="preco" required>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <h2>Editar Produto</h2>
+    <form id="editForm">
+        ID: <input type="number" id="editId" required>
+        Nome: <input type="text" id="editNome" required>
+        Preço: <input type="number" id="editPreco" required>
+        <button type="submit">Editar</button>
+    </form>
+
+    <h2>Deletar Produto</h2>
+    <form id="deleteForm">
+        ID: <input type="number" id="deleteId" required>
+        <button type="submit">Deletar</button>
+    </form>
+
+    <h2>Listar Produtos</h2>
+    <button id="listButton">Mostrar Produtos</button>
+    <ul id="productList"></ul>
+
+    <script>
+        async function fetchProducts() {
+            const response = await fetch('/produtos');
+            const produtos = await response.json();
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+
+            produtos.forEach(produto => {
+                const li = document.createElement('li');
+                li.textContent = `ID: ${produto.id}, Nome: ${produto.nome}, Preço: ${produto.preco}`;
+                productList.appendChild(li);
+            });
+        }
+
+        document.getElementById('produtoForm').onsubmit = async function(event) {
+            event.preventDefault();
+            const nome = document.getElementById('nome').value;
+            const preco = document.getElementById('preco').value;
+
+            const response = await fetch('/produtos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, preco })
+            });
+
+            const result = await response.json();
+            alert('Produto salvo com ID: ' + result.id);
+            await fetchProducts();
+        };
+
+        document.getElementById('editForm').onsubmit = async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('editId').value;
+            const nome = document.getElementById('editNome').value;
+            const preco = document.getElementById('editPreco').value;
+
+            const response = await fetch(`/produtos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, preco })
+            });
+
+            const result = await response.json();
+            alert('Produto editado com ID: ' + result.id);
+            await fetchProducts();
+        };
+
+        document.getElementById('deleteForm').onsubmit = async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('deleteId').value;
+
+            const response = await fetch(`/produtos/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Produto deletado com ID: ' + id);
+                await fetchProducts(); 
+            } else {
+                alert('Erro ao deletar produto com ID: ' + id);
+            }
+        };
+
+        document.getElementById('listButton').onclick = fetchProducts;
+    </script>
+</body>
+</html>

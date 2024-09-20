@@ -1,3 +1,5 @@
+/* Add PostgreSQL JDBC */
+
 import java.util.Scanner;
 
 public class Main {
